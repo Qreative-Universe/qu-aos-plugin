@@ -1,0 +1,52 @@
+name: Build WordPress plugin ZIP on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-zip:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create plugin ZIP
+        id: zip
+        run: |
+          # 레포 이름 (예: qu-simple-aos)
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"
+          # 태그/릴리즈 이름 (예: v1.2.0)
+          TAG_NAME="${GITHUB_REF_NAME:-$GITHUB_REF}"
+
+          echo "Repository name: $REPO_NAME"
+          echo "Tag name: $TAG_NAME"
+
+          # 빌드용 디렉토리 생성
+          mkdir -p build/"$REPO_NAME"
+
+          # .git, .github, build 디렉토리는 제외하고 복사
+          rsync -av \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='build' \
+            ./ build/"$REPO_NAME" >/dev/null
+
+          cd build
+
+          ZIP_NAME="${REPO_NAME}-${TAG_NAME}.zip"
+          echo "Creating ZIP: $ZIP_NAME"
+
+          # 워드프레스 플러그인 ZIP 생성
+          zip -r "$ZIP_NAME" "$REPO_NAME"
+
+          # 다음 스텝에서 사용할 수 있도록 출력값으로 전달
+          echo "zip_name=$ZIP_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Upload ZIP to current Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/${{ steps.zip.outputs.zip_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
