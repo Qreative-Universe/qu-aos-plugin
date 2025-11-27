@@ -2,7 +2,7 @@
 /**
  * Plugin Name: QU Simple AOS
  * Description: 심플하고 가벼운 AOS(Animate On Scroll) 로더 플러그인. 관리자에서 init 옵션과 JS 소스(CDN/로컬)를 설정할 수 있습니다.
- * Version: 2.0.0
+ * Version: 1.2.0
  * Author: QU
  */
 
@@ -375,3 +375,4 @@ function qu_aos_render_settings_page() {
     </div>
     <?php
 }
+
